@@ -74,6 +74,7 @@ footer{margin-top:60px;color:var(--muted);font-size:.85rem}
   <span class="badge">🎉 Glückwunsch, du hast geklickt!</span>
   <h1>Das hat deine Klick-Nummer <span class="pink">schon über dich verraten.</span></h1>
   <p>Du hast nur einen Link angetippt. Trotzdem weiß diese Seite jetzt einiges über dich.</p>
+  <p id="count" class="badge" style="display:none;background:var(--mint)"></p>
 </section>
 
 <section id="daten">
@@ -249,6 +250,25 @@ $('#live').addEventListener('change',load);load();
 getExtra().then(x=>{extra=x;if(x.length&&last)render(last[0],last[1]);});
 $('#cards').addEventListener('click',e=>{const c=e.target.closest('.card');if(c)c.classList.toggle('open');});
 $('#cards').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const c=e.target.closest('.card');if(c){e.preventDefault();c.classList.toggle('open');}}});
+
+/* ---------- Klick-Zähler (Firebase Realtime Database) ----------
+   Trage hier die Adresse deiner Datenbank ein, z. B.
+   'https://mein-projekt-default-rtdb.europe-west1.firebasedatabase.app'
+   Leer lassen = kein Zähler. Gespeichert wird nur eine Zahl, keine IP, keine Namen. */
+const DB_URL='https://runners-game-default-rtdb.europe-west1.firebasedatabase.app';
+(async()=>{
+  if(!DB_URL)return;
+  const u=DB_URL.replace(/\/$/,'')+'/klicks.json';
+  try{
+    let seen=false;try{seen=sessionStorage.getItem('gezaehlt')==='1';}catch(e){}
+    if(!seen){
+      await fetch(u,{method:'PUT',body:JSON.stringify({'.sv':{increment:1}})});
+      try{sessionStorage.setItem('gezaehlt','1');}catch(e){}
+    }
+    const n=await (await fetch(u)).json();
+    if(typeof n==='number'){const c=$('#count');c.textContent='👥 Dieser Link wurde schon '+n.toLocaleString('de-DE')+'-mal geklickt';c.style.display='';}
+  }catch(e){}
+})();
 
 /* ---------- 2. Der verbotene Knopf ---------- */
 const nope=$('#nope'),arena=$('#arena');let dodge=0;
