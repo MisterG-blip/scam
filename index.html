@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gewinner-Check: Was verrät dein Klick?</title>
+<style>
+:root{--ink:#1b1340;--panel:#2a1f63;--pink:#ff3d8b;--yellow:#ffd23f;--mint:#3de0c0;--text:#f6f3ff;--muted:#b9b0e6;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--text);font:17px/1.55 "Trebuchet MS","Segoe UI",system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:0 18px 80px}
+section{margin-top:56px}
+h1,h2,h3{font-weight:900;line-height:1.1;margin:0 0 .5em}
+h1{font-size:clamp(2.2rem,7vw,3.8rem);transform:rotate(-1.5deg)}
+h2{font-size:clamp(1.5rem,4.5vw,2.1rem)}
+p{margin:0 0 1em;max-width:62ch}
+.hero{padding-top:44px}
+.badge{display:inline-block;background:var(--yellow);color:var(--ink);font-weight:900;padding:.2em .7em;border-radius:99px;margin-bottom:14px}
+.pink{color:var(--pink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{background:var(--panel);border-radius:14px;padding:14px 16px;border-left:6px solid var(--mint)}
+.card.srv{border-color:var(--pink)}
+.card b{display:block;font-size:.85rem;color:var(--muted);font-weight:700}
+.card .v{font-size:1.1rem;font-weight:800;word-break:break-word}
+.card{cursor:pointer}.card small{display:none;color:var(--muted);margin-top:6px;line-height:1.35}.card.open small{display:block}.card .v::after{content:' ▾';color:var(--muted);font-size:.8em}.card.open .v::after{content:' ▴'}
+#rest{display:none}#rest.on{display:block}
+.skip{background:none;color:var(--muted);font-weight:400;font-size:.8rem;padding:.4em 0;text-decoration:underline}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 16px;color:var(--muted);font-size:.9rem}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.switch{display:flex;gap:10px;align-items:flex-start;background:var(--panel);padding:12px 14px;border-radius:12px;margin-bottom:14px;font-size:.92rem}
+.switch input{margin-top:5px;width:18px;height:18px;accent-color:var(--pink)}
+button{font:inherit;font-weight:900;border:0;border-radius:12px;padding:.8em 1.3em;cursor:pointer;background:var(--pink);color:#fff}
+button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+button.alt{background:var(--mint);color:var(--ink)}
+.arena{position:relative;height:170px;background:repeating-linear-gradient(45deg,var(--panel),var(--panel) 14px,#31257a 14px,#31257a 28px);border-radius:16px;overflow:hidden}
+.nope{position:absolute;left:calc(50% - 130px);top:55px;width:260px;background:#e11;font-size:1.05rem;transition:left .25s,top .25s}
+.prize{background:linear-gradient(135deg,var(--pink),#7a3dff);border-radius:20px;padding:24px}
+.prize h2{color:var(--yellow)}
+form{display:grid;gap:12px;margin-top:16px}
+label{font-weight:800;font-size:.95rem}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=password]{width:100%;font:inherit;padding:.65em .8em;border-radius:10px;border:0;margin-top:4px;background:#fff;color:#222}
+.hint{font-size:.85rem;opacity:.9}
+.reveal{display:none;background:var(--ink);border:3px solid var(--yellow);border-radius:16px;padding:18px;margin-top:18px}
+.reveal.on{display:block}
+.reveal li{margin-bottom:.6em}
+.risk{display:inline-block;font-size:.75rem;font-weight:900;background:var(--pink);padding:.1em .6em;border-radius:99px;margin-left:6px}
+.mail{background:#fff;color:#222;border-radius:14px;padding:18px;font-size:.95rem}
+.mail .hd{border-bottom:1px solid #ddd;padding-bottom:10px;margin-bottom:12px;color:#555}
+.mail .btn{display:inline-block;background:#f90;color:#fff;font-weight:700;padding:.6em 1.2em;border-radius:6px;margin:8px 0}
+.n{display:inline-grid;place-items:center;width:1.4em;height:1.4em;border-radius:50%;background:var(--pink);color:#fff;font-size:.75rem;font-weight:900;margin-right:3px;vertical-align:1px}
+mark{background:#ffe3ef;color:#222;padding:0 2px;border-radius:3px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.box{background:var(--panel);border-radius:16px;padding:18px}
+.box ul,.box ol,.reveal ul{margin:0;padding-left:1.2em}
+.quiz{background:var(--panel);border-radius:16px;padding:18px}
+.q{font-size:1.15rem;font-weight:800;background:var(--ink);padding:14px;border-radius:12px;margin:10px 0;word-break:break-word}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.fb{min-height:3em;margin:12px 0;font-weight:700}
+.ok{color:var(--mint)}.bad{color:var(--yellow)}
+#ov{position:fixed;inset:0;z-index:9;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.8)}
+#ov.on{display:grid}
+.dlg{max-width:520px;background:#fff;color:#222;border-radius:12px;padding:22px;text-align:center}
+.dlg.red{background:#c00;color:#fff}
+.dlg h3{font-size:1.5rem}
+.dlg button{margin:4px}
+footer{margin-top:60px;color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+
+<section class="hero">
+  <span class="badge">🎉 Glückwunsch, du hast geklickt!</span>
+  <h1>Das hat deine Klick-Nummer <span class="pink">schon über dich verraten.</span></h1>
+  <p>Du hast nur einen Link angetippt. Trotzdem weiß diese Seite jetzt einiges über dich.</p>
+</section>
+
+<section id="daten">
+  <h2>Das konnte die Seite sofort sehen</h2>
+  <div class="legend">
+    <span><i style="background:var(--mint)"></i>Dein Browser verrät es</span>
+    <span><i style="background:var(--pink)"></i>Der Server sieht es</span>
+    <span>👆 Tippe auf eine Karte: Warum ist das wichtig?</span>
+  </div>
+  <label class="switch"><input type="checkbox" id="live" checked>
+    <span><b>Echte IP-Abfrage</b> (über ipwho.is). Aus = Beispielwerte. Es wird nichts gespeichert.</span></label>
+  <div class="grid" id="cards"></div>
+</section>
+
+<section>
+  <h2>Und jetzt: bloß nicht klicken!</h2>
+  
+  <div class="arena" id="arena"><button class="nope" id="nope">⛔ Auf keinen Fall klicken</button></div>
+  <button class="skip" id="skip">Lehrkraft: direkt zum Rest</button>
+</section>
+
+<div id="rest">
+<section>
+  <div class="prize">
+    <h2>🎁 Gewinnspiel: Du hast ein Smartphone gewonnen!</h2>
+    <p>Nur noch die Daten eintragen, damit wir dir den Gewinn schicken können. Dauert 30 Sekunden. Der Gewinn verfällt in <b id="cd">09:59</b>!</p>
+    <p class="hint"><b>Wichtig für den Test:</b> Gib hier bitte <b>keine echten Daten</b> ein. Erfundene Angaben reichen völlig. Es wird nichts gesendet oder gespeichert.</p>
+    <form id="form" autocomplete="off">
+      <label>Vor- und Nachname<input type="text" name="name" placeholder="z. B. Max Muster"></label>
+      <label>E-Mail-Adresse<input type="email" name="mail" placeholder="max@beispiel.de"></label>
+      <label>Handynummer (für die Gewinn-SMS)<input type="tel" name="tel" placeholder="0170 1234567"></label>
+      <label>Geburtsdatum (nur zur Altersprüfung)<input type="date" name="geb"></label>
+      <label>Adresse<input type="text" name="adr" placeholder="Straße, Hausnummer, PLZ, Ort"></label>
+      <label>Passwort für dein Gewinn-Konto<input type="password" name="pw" placeholder="Wähl ein Passwort"></label>
+      <button type="submit" style="background:var(--yellow);color:var(--ink)">Gewinn jetzt abholen</button>
+    </form>
+    <div class="reveal" id="rev" role="status"></div>
+  </div>
+</section>
+
+<section>
+  <h2>So sieht eine Phishing-Mail aus</h2>
+  <div class="mail">
+    <div class="hd"><span class="n">1</span><b>Von:</b> <mark>Amazon Gewinnservice</mark> &lt;gewinn@<mark>amaz0n-support.xyz</mark>&gt;<br><b>Betreff:</b> <span class="n">2</span><mark>DRINGEND!!! Du hast ein iPhone gewonnen</mark></div>
+    <p><span class="n">3</span><mark>Hallo Kunde</mark>,<br>du wurdest unter 1.000.000 Nutzern ausgewählt! <span class="n">4</span><mark>Hol dir deinen Gewinn innerhalb von 24 Stunden ab</mark>, sonst verfällt er.</p>
+    <span class="btn">Gewinn abholen</span><br>
+    <small>Link-Ziel: <span class="n">5</span><mark>http://amazon.gewinn-check.xyz/login</mark></small>
+    <p style="margin-top:10px"><span class="n">6</span><mark>Bitte gib Name, Adresse und Kreditkartendaten an.</mark></p>
+  </div>
+  <div class="box" style="margin-top:14px"><ol>
+    <li><b>Absender:</b> Die Adresse gehört nicht zu Amazon. Der Anzeigename lässt sich beliebig einstellen, die Adresse dahinter zählt.</li>
+    <li><b>Druck und Ausrufezeichen:</b> „Dringend“ soll dich zum Handeln bringen, bevor du nachdenkst.</li>
+    <li><b>Anrede „Kunde“:</b> Echte Firmen kennen deinen Namen.</li>
+    <li><b>Zeitlimit:</b> Dasselbe Prinzip wie der Countdown oben im Gewinnspiel.</li>
+    <li><b>Link:</b> Entscheidend ist der Teil direkt vor dem ersten „/“. Hier ist es gewinn-check.xyz, nicht amazon.de.</li>
+    <li><b>Dateneingabe:</b> Wer Gewinne verschenkt, braucht keine Kreditkarte.</li>
+  </ol></div>
+</section>
+
+<section>
+  <h2>Tipps: So erkennst du Phishing</h2>
+  <div class="cols">
+    <div class="box"><h3>Stopp, wenn …</h3><ul>
+      <li>du unter Zeitdruck gesetzt wirst</li>
+      <li>etwas zu schön ist, um wahr zu sein</li>
+      <li>nach Passwort, PIN oder Bankdaten gefragt wird</li>
+      <li>die Nachricht unerwartet kommt, auch von Freunden</li></ul></div>
+    <div class="box"><h3>Prüfe …</h3><ul>
+      <li>die echte Absenderadresse</li>
+      <li>das Linkziel: Mit dem Finger oder der Maus draufhalten, nicht klicken</li>
+      <li>Schreibfehler und seltsame Endungen wie .xyz oder .top</li>
+      <li>ob du im Zweifel selbst die offizielle Seite eintippst</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>Echt oder Fake?</h2>
+  <div class="quiz">
+    <div id="qmeta" class="hint"></div>
+    <div class="q" id="qtext"></div>
+    <div class="row"><button class="alt" id="bReal">✅ Echt</button><button id="bFake">🎣 Fake</button></div>
+    <div class="fb" id="qfb" aria-live="polite"></div>
+    <button id="bNext" style="display:none;background:var(--yellow);color:var(--ink)">Weiter</button>
+  </div>
+</section>
+
+<section>
+  <h2>Was tun, wenn ich schon geklickt habe?</h2>
+  <div class="box"><ol>
+    <li><b>Ruhig bleiben.</b> Nur klicken ist meistens harmlos. Gefährlich wird es bei Eingaben oder Downloads.</li>
+    <li><b>Nichts mehr eingeben</b> und die Seite schließen.</li>
+    <li><b>Passwort ändern</b>, falls du eins eingegeben hast, auch überall dort, wo du es noch benutzt.</li>
+    <li><b>Erwachsene informieren</b>: Eltern oder Lehrkräfte. Das ist keine Peinlichkeit, auch Profis fallen darauf rein.</li>
+    <li><b>Bei Bankdaten:</b> Sofort Bank oder Eltern anrufen, damit die Karte gesperrt wird.</li>
+    <li><b>Datei heruntergeladen?</b> Nicht öffnen, löschen und das Gerät mit einem Virenscanner prüfen.</li>
+  </ol></div>
+</section>
+</div>
+
+<footer>Lernseite zur Aufklärung über Phishing. Alle Gewinne, Warnungen und Mails auf dieser Seite sind erfunden. Es werden keine Daten gespeichert oder an uns gesendet.</footer>
+</div>
+</main>
+
+<div id="ov"><div class="dlg" id="dlg"></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- 1. Datenspiegel ---------- */
+const ua=navigator.userAgent;
+const browser=/Edg\//.test(ua)?'Edge':/OPR\//.test(ua)?'Opera':/Firefox\//.test(ua)?'Firefox':/Chrome\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':'Unbekannt';
+const os=/Windows/.test(ua)?'Windows':/Android/.test(ua)?'Android':/iPhone|iPad/.test(ua)?'iOS':/Mac/.test(ua)?'macOS':/Linux/.test(ua)?'Linux':'Unbekannt';
+const mobile=/Mobi|Android|iPhone/.test(ua)?'Smartphone/Tablet':'Computer';
+const conn=navigator.connection?(navigator.connection.effectiveType||'').toUpperCase():'';
+const local=[
+ ['Browser',browser,'Verrät, welche Sicherheitslücken bei dir möglich sind.'],
+ ['Betriebssystem',os+' ('+mobile+')','Betrüger passen Fake-Seiten und Schadsoftware an dein System an.'],
+ ['Sprache',navigator.language||'?','Zeigt, ob eine Nachricht auf deine Sprache zugeschnitten werden kann.'],
+ ['Zeitzone',Intl.DateTimeFormat().resolvedOptions().timeZone,'Verrät grob, in welcher Weltregion du bist.'],
+ ['Bildschirm',screen.width+' × '+screen.height+' px','Zusammen mit anderen Werten ergibt das einen „Fingerabdruck“ deines Geräts.'],
+ ['Prozessor-Kerne',navigator.hardwareConcurrency||'?','Noch ein Baustein für den Geräte-Fingerabdruck.'],
+ ['Woher du kamst',document.referrer||'Direkt (kein Verweis)','Zeigt, über welche Seite oder App du auf den Link getippt hast.'],
+ ['Cookies / Tracking',(navigator.cookieEnabled?'Cookies erlaubt':'Cookies aus')+(navigator.doNotTrack==='1'?', „Nicht verfolgen“ an':''),'Damit lassen sich Besucher beim nächsten Mal wiedererkennen.'],
+ ['Netzwerk',conn||'Nicht auslesbar',"Unterwegs oder im WLAN: Auch das ist ein Hinweis auf deine Situation."]
+];
+const example={ip:'203.0.113.42',isp:'Beispiel-Telekom GmbH',loc:'Hamburg, Deutschland'};
+function card(l,v,n,srv){return '<div class="card'+(srv?' srv':'')+'" tabindex="0" role="button"><b>'+esc(l)+'</b><div class="v">'+esc(v)+'</div><small>'+esc(n)+'</small></div>';}
+let extra=[],last=null;
+function render(s,note){
+  last=[s,note];
+  const open=[...document.querySelectorAll('.card.open b')].map(b=>b.textContent);
+  $('#cards').innerHTML=
+   card('IP-Adresse',s.ip,'Wie deine Hausnummer im Internet. Sie wird bei jeder Verbindung mitgeschickt.'+note,1)+
+   card('Provider',s.isp,'Die Firma, die dein Internet liefert. Sie verrät, ob du zu Hause, in der Schule oder im Mobilfunk bist.'+note,1)+
+   card('Ungefährer Ort',s.loc,'Wird aus der IP geschätzt, meist auf Stadtebene. Genau genug, um „aus deiner Nähe“ zu behaupten.'+note,1)+
+   local.concat(extra).map(x=>card(x[0],x[1],x[2],0)).join('');
+  document.querySelectorAll('.card').forEach(c=>{if(open.includes(c.querySelector('b').textContent))c.classList.add('open');});
+}
+/* Nur echte Werte: Was der Browser nicht verrät, wird nicht angezeigt */
+function cleanGpu(r){
+  if(!r)return '';
+  const m=r.match(/^ANGLE \((.*)\)$/);
+  if(m){const p=m[1].split(', ');r=p.length>1?p[1]:p[0];}
+  r=r.replace(/^ANGLE Metal Renderer:\s*/i,'');
+  r=r.replace(/\s*(Direct3D\d*.*|OpenGL.*|vs_\d.*|\(0x[0-9a-f]+\))$/i,'').trim();
+  return /^(Apple GPU|WebKit|SwiftShader|llvmpipe|Mesa|Microsoft Basic|Google SwiftShader)/i.test(r)||r.length<3?'':r;
+}
+async function getExtra(){
+  const out=[];
+  try{
+    const h=await navigator.userAgentData.getHighEntropyValues(['model']);
+    if(h.model&&h.model.length>1&&h.model!=='K')out.push(['Gerätemodell',h.model,'Betrüger wissen so, welche Sicherheitslücken dein Handy hat, und können dich gezielt ansprechen.']);
+  }catch(e){}
+  try{
+    const gl=document.createElement('canvas').getContext('webgl'),ext=gl&&gl.getExtension('WEBGL_debug_renderer_info');
+    const g=ext?cleanGpu(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)):'';
+    if(g)out.push(['Grafikkarte',g,'Das ist ein Baustein für deinen Geräte-Fingerabdruck. Damit erkennt man dich auch ohne Cookies wieder.']);
+  }catch(e){}
+  if(navigator.deviceMemory)out.push(['Arbeitsspeicher','ca. '+navigator.deviceMemory+' GB','Noch ein Baustein für den Fingerabdruck. Der Wert ist absichtlich nur grob.']);
+  return out;
+}
+async function load(){
+  if(!$('#live').checked){render(example,' (Beispielwert)');return;}
+  render({ip:'wird geladen …',isp:'…',loc:'…'},'');
+  try{
+    const r=await fetch('https://ipwho.is/'),d=await r.json();
+    if(!d.success)throw 0;
+    render({ip:d.ip,isp:(d.connection&&(d.connection.isp||d.connection.org))||'Unbekannt',loc:[d.city,d.region,d.country].filter(Boolean).join(', ')},'');
+  }catch(e){render(example,' (Abfrage nicht möglich, deshalb Beispielwert)');}
+}
+$('#live').addEventListener('change',load);load();
+getExtra().then(x=>{extra=x;if(x.length&&last)render(last[0],last[1]);});
+$('#cards').addEventListener('click',e=>{const c=e.target.closest('.card');if(c)c.classList.toggle('open');});
+$('#cards').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const c=e.target.closest('.card');if(c){e.preventDefault();c.classList.toggle('open');}}});
+
+/* ---------- 2. Der verbotene Knopf ---------- */
+const nope=$('#nope'),arena=$('#arena');let dodge=0;
+function run(){
+  if(dodge>=5)return;dodge++;
+  nope.style.left=Math.random()*(arena.clientWidth-nope.offsetWidth)+'px';
+  nope.style.top=Math.random()*(arena.clientHeight-nope.offsetHeight)+'px';
+  if(dodge===5)nope.textContent='⛔ Na gut, jetzt aber …';
+}
+nope.addEventListener('mouseenter',run);
+nope.addEventListener('touchstart',e=>{if(dodge<5){e.preventDefault();run();}},{passive:false});
+function show(html,red){const d=$('#dlg');d.className='dlg'+(red?' red':'');d.innerHTML=html;$('#ov').classList.add('on');}
+let revealed=false;
+function unlock(){const r=$('#rest');if(r.classList.contains('on'))return;r.classList.add('on');r.scrollIntoView({behavior:'smooth'});}
+function hide(){$('#ov').classList.remove('on');if(revealed)unlock();}
+$('#skip').onclick=unlock;
+nope.addEventListener('click',()=>{
+  if(dodge<5){run();return;}
+  show('<h3>⚠️ ACHTUNG! Dein Gerät ist mit 3 Viren infiziert!</h3><p>Deine Fotos und Passwörter werden gerade gelöscht. Rufe sofort <b>0800-123-456</b> an oder bereinige dein Gerät jetzt.</p><button id="clean" style="background:#fff;color:#c00">Jetzt bereinigen</button><button id="x" style="background:#600">Schließen</button>',true);
+  $('#clean').onclick=$('#x').onclick=fake;
+});
+function fake(){
+  revealed=true;
+  show('<h3>😄 Reingelegt!</h3><p>Das war nur eine Webseite. Wirklich infiziert ist nichts. Genau so läuft die Masche „Scareware“ ab:</p><ul style="text-align:left"><li>Ein Warnfenster macht dir Angst.</li><li>Eine Nummer oder ein Button soll dich zum Handeln bringen.</li><li>Am Ende sollst du zahlen, etwas installieren oder Fremden Zugriff auf dein Gerät geben.</li></ul><p><b>Merke:</b> Dein Browser zeigt nie Telefonnummern an und wird nie sagen „Du bist infiziert“. Fenster einfach schließen. Geht das nicht, hilft ein Neustart.</p><button id="ok" style="background:#3de0c0;color:#1b1340">Verstanden, weiter</button>');
+  $('#ok').onclick=hide;
+}
+addEventListener('keydown',e=>{if(e.key==='Escape')hide();});
+
+/* ---------- 3. Gewinnspiel ---------- */
+let t=599;setInterval(()=>{t=t>0?t-1:599;$('#cd').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');},1000);
+const info={
+ name:['Name','Damit kann man dich persönlich ansprechen („Hallo Max!“). Das wirkt echt und senkt dein Misstrauen.','mittel'],
+ mail:['E-Mail','Ab jetzt bekommst du Spam und gezielte Phishing-Mails. Außerdem ist sie oft dein Zugang zu anderen Konten („Passwort vergessen“).','hoch'],
+ tel:['Handynummer','Betrüger schicken Fake-SMS (Smishing) und rufen an. Die Nummer wird oft weiterverkauft.','hoch'],
+ geb:['Geburtsdatum','Name plus Geburtsdatum reichen für Identitätsdiebstahl, zum Beispiel bei Bestellungen auf deinen Namen. Wird auch als Sicherheitsfrage genutzt.','hoch'],
+ adr:['Adresse','Jetzt weiß jemand, wo du wohnst. Das ermöglicht gefälschte Pakete, Post und im schlimmsten Fall Belästigung.','hoch'],
+ pw:['Passwort','Das Gefährlichste von allem. Viele nutzen ein Passwort mehrfach. Betrüger probieren es sofort bei Instagram, TikTok, Spielen und Mail aus.','sehr hoch']
+};
+$('#form').addEventListener('submit',e=>{
+  e.preventDefault();const f=new FormData(e.target);let li='',n=0;
+  for(const k in info){const v=(f.get(k)||'').toString().trim();if(!v)continue;n++;
+    li+='<li><b>'+info[k][0]+'</b><span class="risk">Risiko: '+info[k][2]+'</span><br>'+info[k][1]+'</li>';}
+  const r=$('#rev');
+  r.innerHTML='<h3>🎣 Das war ein Phishing-Formular!</h3><p>Es gibt keinen Gewinn. <b>Nichts wurde gesendet oder gespeichert.</b> In einer echten Falle wäre es jetzt aber passiert.</p>'+
+   (n?'<p>Du hast <b>'+n+' Angabe'+(n>1?'n':'')+'</b> gemacht. Das hätten Betrüger damit anfangen können:</p><ul>'+li+'</ul>':'<p>Du hast nichts eingetragen. Perfekt gemacht! Das wäre die beste Reaktion. Das hier wäre bei einem echten Formular passiert, wenn du alles ausgefüllt hättest:</p><ul>'+Object.values(info).map(i=>'<li><b>'+i[0]+':</b> '+i[1]+'</li>').join('')+'</ul>')+
+   '<p><b>Warnzeichen hier:</b> Gewinn ohne Teilnahme, Countdown, viele persönliche Daten, ein Passwort für ein „Gewinn-Konto“. Seriöse Gewinnspiele brauchen höchstens eine E-Mail-Adresse.</p>';
+  r.classList.add('on');r.scrollIntoView({behavior:'smooth',block:'center'});
+});
+
+/* ---------- 4. Quiz ---------- */
+const Q=[
+ {t:'SMS: „DHL: Dein Paket wartet. Zahle 1,99 € Gebühr: dhl-paket-zustellung.top/x7Kq“',f:true,e:'Fake. Die Endung .top gehört nicht zu DHL, und echte Paketdienste verlangen keine Gebühr per SMS-Link.'},
+ {t:'Du tippst in der App auf „Passwort vergessen“. Eine Minute später kommt eine Mail mit einem Link zum Zurücksetzen.',f:false,e:'Meist echt, denn du hast es selbst ausgelöst. Erwartete Nachrichten sind ein gutes Zeichen. Wenn du unsicher bist, öffne die App direkt statt den Link.'},
+ {t:'https://paypal.com.konto-sicher.de/login',f:true,e:'Fake. Maßgeblich ist der Teil direkt vor dem ersten „/“. Das ist konto-sicher.de. „paypal.com“ steht davor nur als Tarnung.'},
+ {t:'„Dein Instagram-Account wird in 24 Stunden gelöscht, wenn du nicht SOFORT bestätigst!“',f:true,e:'Fake. Zeitdruck und Drohung sind die klassischen Merkmale. Instagram löscht keine Accounts per Link-Ultimatum.'},
+ {t:'Eine Freundin schreibt: „Hey, bist du das auf dem Video? bit.ly/3xYz“. Ihr schreibt sonst nie so.',f:true,e:'Sehr wahrscheinlich Fake. Ihr Account könnte gehackt sein. Frag sie auf einem anderen Weg, zum Beispiel persönlich oder per Anruf.'}
+];
+let qi=0,score=0,done=false;
+function showQ(){
+  if(qi>=Q.length){$('#qmeta').textContent='Geschafft';$('#qtext').textContent='Du hast '+score+' von '+Q.length+' richtig.';
+    $('#qfb').textContent=score===Q.length?'Perfekt. Du bist ein echter Phishing-Profi! 🏆':score>=3?'Stark! Noch einmal die Tipps lesen, dann bist du fit.':'Kein Problem, genau dafür ist die Seite da. Lies die Tipps und versuch es nochmal.';
+    $('#bReal').style.display=$('#bFake').style.display='none';$('#bNext').textContent='Nochmal spielen';$('#bNext').style.display='';$('#bNext').onclick=()=>{qi=0;score=0;$('#bReal').style.display=$('#bFake').style.display='';$('#bNext').textContent='Weiter';$('#bNext').onclick=next;showQ();};return;}
+  done=false;$('#qmeta').textContent='Frage '+(qi+1)+' von '+Q.length;$('#qtext').textContent=Q[qi].t;$('#qfb').textContent='';$('#qfb').className='fb';$('#bNext').style.display='none';
+}
+function answer(fake){
+  if(done)return;done=true;const q=Q[qi],right=fake===q.f;if(right)score++;
+  $('#qfb').className='fb '+(right?'ok':'bad');$('#qfb').textContent=(right?'✅ Richtig! ':'❌ Leider nicht. ')+q.e;
+  $('#bNext').style.display='';
+}
+function next(){qi++;showQ();}
+$('#bReal').onclick=()=>answer(false);$('#bFake').onclick=()=>answer(true);$('#bNext').onclick=next;showQ();
+</script>
+</body>
+</html>
